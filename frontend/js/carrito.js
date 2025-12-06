@@ -141,6 +141,20 @@ function eliminarProducto(id) {
 }
 
 async function realizarPedido() {
+    // Verificar si el usuario está autenticado
+    if (!window.authUtils || !window.authUtils.isLoggedIn()) {
+        // Mostrar modal de login
+        const loginModal = document.getElementById('loginModal');
+        if (loginModal) {
+            const modal = new bootstrap.Modal(loginModal);
+            modal.show();
+        } else {
+            alert('Por favor, inicia sesión para realizar tu pedido.');
+            window.location.href = '/static/login.html';
+        }
+        return;
+    }
+
     let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
     if (carrito.length === 0) {
         alert('El carrito está vacío');

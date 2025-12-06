@@ -93,3 +93,51 @@ def ruta_protegida(user=Depends(get_current_user)):
         "mensaje": "Acceso concedido",
         "usuario": user
     }
+
+# ----------------------------
+# CREAR USUARIO ADMIN (PRUEBA)
+# ----------------------------
+@router.post("/crear-admin-prueba")
+def crear_admin_prueba(db: Session = Depends(get_db)):
+    """
+    ⚠️ RUTA DE PRUEBA: Crea un usuario admin para desarrollo.
+    En producción, eliminar esta ruta o protegerla adecuadamente.
+    """
+    correo = "admin@cuvipop.com"
+    password = "admin123"
+    nombre = "Administrador"
+
+    # Verificar si ya existe
+    existe = db.query(Usuario).filter(Usuario.correo == correo).first()
+    if existe:
+        return {
+            "mensaje": "El usuario admin ya existe",
+            "correo": correo,
+            "password": "***oculta***"
+        }
+
+    # Crear admin
+    admin = Usuario(
+        nombre=nombre,
+        correo=correo,
+        password=hash_password(password),
+        rol="admin"
+    )
+
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+
+    return {
+        "mensaje": "✅ Usuario admin creado correctamente",
+        "usuario": {
+            "id": admin.id,
+            "nombre": admin.nombre,
+            "correo": admin.correo,
+            "rol": admin.rol.value
+        },
+        "credenciales": {
+            "correo": correo,
+            "password": password
+        }
+    }
